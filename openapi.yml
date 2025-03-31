@@ -1,4 +1,6 @@
 openapi: 3.0.2
+Pack:
+    x-speakeasy-entity: Pack
 paths:
     "/v4/organizations/{organizationId}/billing/usage/{metricType}":
         get:
@@ -13460,7 +13462,7 @@ paths:
                             schema:
                                 type: object
                                 properties:
-                                    count:
+                                    count_test:
                                         type: integer
                                         description: number of items present in the items array
                                     items:
@@ -13482,6 +13484,8 @@ paths:
                     application/json:
                         schema:
                             $ref: "#/components/schemas/CrudEntityBase"
+            x-speakeasy-entity-operation: Pack#create
+    
         get:
             operationId: getPacks
             tags:
@@ -17521,6 +17525,26 @@ components:
             scheme: bearer
             bearerFormat: JWT
     schemas:
+        Pack:
+            x-speakeasy-entity: Pack
+            type: object
+            properties:
+                name:
+                    type: string
+                name_prefix:
+                    type: string
+                    x-speakeasy-conflicts-with: name
+                id:
+                    type: string
+                generated_name_options:
+                    type: object
+                    properties:
+                        prefix:
+                            type: string
+                            x-speakeasy-conflicts-with:
+                                - ../name_prefix
+                                - ../name
+                                - ../id
         MetricType:
             type: string
             enum:

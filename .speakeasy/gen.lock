@@ -1,12 +1,12 @@
 lockVersion: 2.0.0
 id: 5adcabeb-8e3c-4254-a46c-0a7bdf4ddc70
 management:
-  docChecksum: c33f6af63b273d9515ea299f96ec67c4
+  docChecksum: 78b92d5f9c340a504c0961197a55ac1c
   docVersion: 4.12.0-alpha.1742471106527-a8a53ddb
   speakeasyVersion: 1.526.0
   generationVersion: 2.563.0
-  releaseVersion: 0.0.2
-  configChecksum: b29532bb3e19ffacbd94a7bc73c02142
+  releaseVersion: 0.0.5
+  configChecksum: 49de1b2f38470ae5aa1251854e8b691a
 features:
   terraform:
     additionalDependencies: 0.1.0
@@ -25,6 +25,7 @@ generatedFiles:
   - USAGE.md
   - examples/README.md
   - examples/provider/provider.tf
+  - examples/resources/cribl-terraform_pack/resource.tf
   - go.mod
   - go.sum
   - internal/planmodifiers/boolplanmodifier/suppress_diff.go
@@ -39,6 +40,8 @@ generatedFiles:
   - internal/planmodifiers/setplanmodifier/suppress_diff.go
   - internal/planmodifiers/stringplanmodifier/suppress_diff.go
   - internal/planmodifiers/utils/state_check.go
+  - internal/provider/pack_resource.go
+  - internal/provider/pack_resource_sdk.go
   - internal/provider/provider.go
   - internal/provider/reflect/diags.go
   - internal/provider/reflect/doc.go
@@ -54,6 +57,8 @@ generatedFiles:
   - internal/provider/reflect/primitive.go
   - internal/provider/reflect/slice.go
   - internal/provider/reflect/struct.go
+  - internal/provider/types/pack_install_info.go
+  - internal/provider/types/pack_install_info_tags.go
   - internal/provider/utils.go
   - internal/sdk/.gitattributes
   - internal/sdk/appscopeconfigs.go

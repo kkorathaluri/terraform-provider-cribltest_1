@@ -10,15 +10,15 @@ import (
 // CreatePacksResponseBody - a list of PackInstallInfo objects
 type CreatePacksResponseBody struct {
 	// number of items present in the items array
-	Count *int64                   `json:"count,omitempty"`
-	Items []shared.PackInstallInfo `json:"items,omitempty"`
+	CountTest *int64                   `json:"count_test,omitempty"`
+	Items     []shared.PackInstallInfo `json:"items,omitempty"`
 }
 
-func (o *CreatePacksResponseBody) GetCount() *int64 {
+func (o *CreatePacksResponseBody) GetCountTest() *int64 {
 	if o == nil {
 		return nil
 	}
-	return o.Count
+	return o.CountTest
 }
 
 func (o *CreatePacksResponseBody) GetItems() []shared.PackInstallInfo {
