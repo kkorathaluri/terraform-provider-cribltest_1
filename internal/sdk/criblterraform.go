@@ -284,9 +284,9 @@ func New(serverURL string, opts ...SDKOption) *CriblTerraform {
 		sdkConfiguration: sdkConfiguration{
 			Language:          "go",
 			OpenAPIDocVersion: "4.12.0-alpha.1742471106527-a8a53ddb",
-			SDKVersion:        "0.0.7",
+			SDKVersion:        "0.0.8",
 			GenVersion:        "2.563.0",
-			UserAgent:         "speakeasy-sdk/terraform 0.0.7 2.563.0 4.12.0-alpha.1742471106527-a8a53ddb github.com/speakeasy/terraform-provider-cribl-terraform/internal/sdk",
+			UserAgent:         "speakeasy-sdk/terraform 0.0.8 2.563.0 4.12.0-alpha.1742471106527-a8a53ddb github.com/speakeasy/terraform-provider-cribl-terraform/internal/sdk",
 			ServerURL:         serverURL,
 			Hooks:             hooks.New(),
 		},
