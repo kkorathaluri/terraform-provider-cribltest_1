@@ -1,0 +1,12 @@
+workflowVersion: 1.0.0
+speakeasyVersion: latest
+sources:
+    Cribl API Reference:
+        inputs:
+            - location: openapi.yml
+        registry:
+            location: registry.speakeasyapi.dev/cribl/cribl/cribl-api-reference
+targets:
+    cribl-terraform:
+        target: terraform
+        source: Cribl API Reference
