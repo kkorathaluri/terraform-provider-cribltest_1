@@ -10,7 +10,3 @@ targets:
     cribl-terraform:
         target: terraform
         source: Cribl API Reference
-        publish:
-            terraform:
-                gpgPrivateKey: $terraform_gpg_private_key
-                gpgPassPhrase: $terraform_gpg_passphrase

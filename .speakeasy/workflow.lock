@@ -2,7 +2,7 @@ speakeasyVersion: 1.526.1
 sources:
     Cribl API Reference:
         sourceNamespace: cribl-api-reference
-        sourceRevisionDigest: sha256:0d9730521f1be7f39aab216a219259d7a21450d35758e2f499c930b1a887bfa8
+        sourceRevisionDigest: sha256:3a1bdbce781b4d18042610e2fe5a1fe64668d8abb94a4f408b7ef30830bc83c8
         sourceBlobDigest: sha256:6d7e884be69ed844467131420de4f007b05d4be3935ac6f47865e3f74f00f087
         tags:
             - latest
@@ -11,7 +11,7 @@ targets:
     cribl-terraform:
         source: Cribl API Reference
         sourceNamespace: cribl-api-reference
-        sourceRevisionDigest: sha256:0d9730521f1be7f39aab216a219259d7a21450d35758e2f499c930b1a887bfa8
+        sourceRevisionDigest: sha256:3a1bdbce781b4d18042610e2fe5a1fe64668d8abb94a4f408b7ef30830bc83c8
         sourceBlobDigest: sha256:6d7e884be69ed844467131420de4f007b05d4be3935ac6f47865e3f74f00f087
 workflow:
     workflowVersion: 1.0.0
@@ -26,7 +26,3 @@ workflow:
         cribl-terraform:
             target: terraform
             source: Cribl API Reference
-            publish:
-                terraform:
-                    gpgPrivateKey: $terraform_gpg_private_key
-                    gpgPassPhrase: $terraform_gpg_passphrase
