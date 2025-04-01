@@ -22,15 +22,15 @@ func (o *GetInputByIDRequest) GetID() string {
 // GetInputByIDResponseBody - a list of Input objects
 type GetInputByIDResponseBody struct {
 	// number of items present in the items array
-	Count *int64         `json:"count,omitempty"`
-	Items []shared.Input `json:"items,omitempty"`
+	CountTotal *int64         `json:"count_total,omitempty"`
+	Items      []shared.Input `json:"items,omitempty"`
 }
 
-func (o *GetInputByIDResponseBody) GetCount() *int64 {
+func (o *GetInputByIDResponseBody) GetCountTotal() *int64 {
 	if o == nil {
 		return nil
 	}
-	return o.Count
+	return o.CountTotal
 }
 
 func (o *GetInputByIDResponseBody) GetItems() []shared.Input {

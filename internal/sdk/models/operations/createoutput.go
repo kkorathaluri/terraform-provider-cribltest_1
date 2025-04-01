@@ -10,15 +10,15 @@ import (
 // CreateOutputResponseBody - a list of Output objects
 type CreateOutputResponseBody struct {
 	// number of items present in the items array
-	Count *int64          `json:"count,omitempty"`
-	Items []shared.Output `json:"items,omitempty"`
+	CountTotal *int64          `json:"count_total,omitempty"`
+	Items      []shared.Output `json:"items,omitempty"`
 }
 
-func (o *CreateOutputResponseBody) GetCount() *int64 {
+func (o *CreateOutputResponseBody) GetCountTotal() *int64 {
 	if o == nil {
 		return nil
 	}
-	return o.Count
+	return o.CountTotal
 }
 
 func (o *CreateOutputResponseBody) GetItems() []shared.Output {

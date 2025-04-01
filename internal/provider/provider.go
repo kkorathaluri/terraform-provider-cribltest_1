@@ -96,12 +96,15 @@ func (p *CriblTerraformProvider) Configure(ctx context.Context, req provider.Con
 
 func (p *CriblTerraformProvider) Resources(ctx context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
+		NewDestinationResource,
 		NewPackResource,
 	}
 }
 
 func (p *CriblTerraformProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
-	return []func() datasource.DataSource{}
+	return []func() datasource.DataSource{
+		NewSourceDataSource,
+	}
 }
 
 func New(version string) func() provider.Provider {

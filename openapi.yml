@@ -1,6 +1,4 @@
 openapi: 3.0.2
-Pack:
-    x-speakeasy-entity: Pack
 paths:
     "/v4/organizations/{organizationId}/billing/usage/{metricType}":
         get:
@@ -8224,7 +8222,7 @@ paths:
                             schema:
                                 type: object
                                 properties:
-                                    count:
+                                    count_total:
                                         type: integer
                                         description: number of items present in the items array
                                     items:
@@ -8242,6 +8240,7 @@ paths:
             operationId: getInputById
             summary: Get Input by ID
             description: Get Input by ID
+            x-speakeasy-entity-operation: Source#read
             parameters:
                 - name: id
                   in: path
@@ -8465,7 +8464,7 @@ paths:
                             schema:
                                 type: object
                                 properties:
-                                    count:
+                                    count_total:
                                         type: integer
                                         description: number of items present in the items array
                                     items:
@@ -8483,6 +8482,7 @@ paths:
             operationId: createOutput
             summary: Create Output
             description: Create Output
+            x-speakeasy-entity-operation: Destination#create
             requestBody:
                 description: New Output object
                 required: true
@@ -13484,6 +13484,24 @@ paths:
                     application/json:
                         schema:
                             $ref: "#/components/schemas/CrudEntityBase"
+                            x-speakeasy-entity: Pack
+                            type: object
+                            properties:
+                                name:
+                                    type: string
+                                id:
+                                    type: string
+                                description:
+                                    type: string
+                                version:
+                                    type: string
+                                disabled:
+                                    type: boolean
+                            required:
+                                - name
+                                - description
+                                - version
+                                - disabled
             x-speakeasy-entity-operation: Pack#create
     
         get:
@@ -17539,7 +17557,49 @@ components:
                     type: string
                 disabled:
                     type: boolean
-                    
+            required:
+                - name
+                - description
+                - version
+                - disabled
+        Source:
+            x-speakeasy-entity: Source
+            type: object
+            properties:
+                name:
+                    type: string
+                id:
+                    type: string
+                description:
+                    type: string
+                version:
+                    type: string
+                disabled:
+                    type: boolean
+            required:
+                - name
+                - description
+                - version
+                - disabled
+        Destination:
+            x-speakeasy-entity: Destination
+            type: object
+            properties:
+                name:
+                    type: string
+                id:
+                    type: string
+                description:
+                    type: string
+                version:
+                    type: string
+                disabled:
+                    type: boolean
+            required:
+                - name
+                - description
+                - version
+                - disabled    
         MetricType:
             type: string
             enum:
