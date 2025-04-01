@@ -3,7 +3,15 @@
 package provider
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
+	"fmt"
+	"io"
+	"net/http"
+	"os"
+	"path/filepath"
+
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
@@ -11,7 +19,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/speakeasy/terraform-provider-cribl-terraform/internal/sdk"
 	"github.com/speakeasy/terraform-provider-cribl-terraform/internal/sdk/models/shared"
-	"net/http"
 )
 
 var _ provider.Provider = &CriblTerraformProvider{}
@@ -25,8 +32,15 @@ type CriblTerraformProvider struct {
 
 // CriblTerraformProviderModel describes the provider data model.
 type CriblTerraformProviderModel struct {
-	BearerAuth types.String `tfsdk:"bearer_auth"`
-	ServerURL  types.String `tfsdk:"server_url"`
+	ClientID     types.String `tfsdk:"client_id"`
+	ClientSecret types.String `tfsdk:"client_secret"`
+	Audience     types.String `tfsdk:"audience"`
+	ServerURL    types.String `tfsdk:"server_url"`
+}
+
+type CriblConfig struct {
+	ClientID     string `json:"client_id"`
+	ClientSecret string `json:"client_secret"`
 }
 
 func (p *CriblTerraformProvider) Metadata(ctx context.Context, req provider.MetadataRequest, resp *provider.MetadataResponse) {
@@ -37,17 +51,99 @@ func (p *CriblTerraformProvider) Metadata(ctx context.Context, req provider.Meta
 func (p *CriblTerraformProvider) Schema(ctx context.Context, req provider.SchemaRequest, resp *provider.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
-			"bearer_auth": schema.StringAttribute{
-				Optional:  true,
-				Sensitive: true,
+			"client_id": schema.StringAttribute{
+				Description: "Client ID for OAuth authentication",
+				Optional:    true,
+				Sensitive:   true,
+			},
+			"client_secret": schema.StringAttribute{
+				Description: "Client Secret for OAuth authentication",
+				Optional:    true,
+				Sensitive:   true,
+			},
+			"audience": schema.StringAttribute{
+				Description: "OAuth audience URL",
+				Optional:    true,
 			},
 			"server_url": schema.StringAttribute{
-				Description: `Server URL`,
+				Description: "Server URL for the Cribl API",
 				Required:    true,
 			},
 		},
 		MarkdownDescription: `Cribl API Reference: This API Reference lists available REST endpoints, along with their supported operations for accessing, creating, updating, or deleting resources. See our complementary product documentation at [docs.cribl.io](http://docs.cribl.io).`,
 	}
+}
+
+func getCredentialsFromConfig() (*CriblConfig, error) {
+	// First try environment variables
+	clientID := os.Getenv("CRIBL_CLIENT_ID")
+	clientSecret := os.Getenv("CRIBL_CLIENT_SECRET")
+
+	if clientID != "" && clientSecret != "" {
+		return &CriblConfig{
+			ClientID:     clientID,
+			ClientSecret: clientSecret,
+		}, nil
+	}
+
+	// Then try ~/.cribl file
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get home directory: %v", err)
+	}
+
+	configPath := filepath.Join(homeDir, ".cribl")
+	file, err := os.ReadFile(configPath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read config file: %v", err)
+	}
+
+	var config CriblConfig
+	if err := json.Unmarshal(file, &config); err != nil {
+		return nil, fmt.Errorf("failed to parse config file: %v", err)
+	}
+
+	return &config, nil
+}
+
+func getBearerToken(clientID, clientSecret, audience string) (string, error) {
+	authURL := "https://login.cribl-playground.cloud/oauth/token"
+	
+	payload := map[string]string{
+		"grant_type":    "client_credentials",
+		"client_id":     clientID,
+		"client_secret": clientSecret,
+		"audience":      audience,
+	}
+
+	jsonData, err := json.Marshal(payload)
+	if err != nil {
+		return "", fmt.Errorf("failed to marshal request: %v", err)
+	}
+
+	resp, err := http.Post(authURL, "application/json", bytes.NewBuffer(jsonData))
+	if err != nil {
+		return "", fmt.Errorf("failed to make request: %v", err)
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", fmt.Errorf("failed to read response: %v", err)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("failed to get token: %s", string(body))
+	}
+
+	var result struct {
+		AccessToken string `json:"access_token"`
+	}
+	if err := json.Unmarshal(body, &result); err != nil {
+		return "", fmt.Errorf("failed to parse response: %v", err)
+	}
+
+	return result.AccessToken, nil
 }
 
 func (p *CriblTerraformProvider) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {
@@ -59,36 +155,50 @@ func (p *CriblTerraformProvider) Configure(ctx context.Context, req provider.Con
 		return
 	}
 
-	ServerURL := data.ServerURL.ValueString()
-
-	if ServerURL == "" {
+	serverURL := data.ServerURL.ValueString()
+	if serverURL == "" {
 		resp.Diagnostics.AddError("server_url is required", "The server_url attribute must be provided in the provider configuration.")
 		return
 	}
 
-	bearerAuth := new(string)
-	if !data.BearerAuth.IsUnknown() && !data.BearerAuth.IsNull() {
-		*bearerAuth = data.BearerAuth.ValueString()
-	} else {
-		bearerAuth = nil
+	// Get credentials from config or environment
+	config, err := getCredentialsFromConfig()
+	if err != nil {
+		resp.Diagnostics.AddError("Failed to get credentials", err.Error())
+		return
 	}
+
+	// Use provider configuration if provided, otherwise use config
+	clientID := data.ClientID.ValueString()
+	if clientID == "" {
+		clientID = config.ClientID
+	}
+
+	clientSecret := data.ClientSecret.ValueString()
+	if clientSecret == "" {
+		clientSecret = config.ClientSecret
+	}
+
+	audience := data.Audience.ValueString()
+	if audience == "" {
+		audience = "https://api.cribl-playground.cloud"
+	}
+
+	// Get bearer token
+	bearerToken, err := getBearerToken(clientID, clientSecret, audience)
+	if err != nil {
+		resp.Diagnostics.AddError("Failed to get bearer token", err.Error())
+		return
+	}
+
 	security := shared.Security{
-		BearerAuth: bearerAuth,
+		BearerAuth: &bearerToken,
 	}
-
-	providerHTTPTransportOpts := ProviderHTTPTransportOpts{
-		SetHeaders: make(map[string]string),
-		Transport:  http.DefaultTransport,
-	}
-
-	httpClient := http.DefaultClient
-	httpClient.Transport = NewProviderHTTPTransport(providerHTTPTransportOpts)
 
 	opts := []sdk.SDKOption{
 		sdk.WithSecurity(security),
-		sdk.WithClient(httpClient),
 	}
-	client := sdk.New(ServerURL, opts...)
+	client := sdk.New(serverURL, opts...)
 
 	resp.DataSourceData = client
 	resp.ResourceData = client
@@ -114,3 +224,4 @@ func New(version string) func() provider.Provider {
 		}
 	}
 }
+
